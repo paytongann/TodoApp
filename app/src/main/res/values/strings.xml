@@ -3,4 +3,5 @@
     <string name="tiet_hint_category">Category</string>
     <string name="tiet_hint_task">Task</string>
     <string name="btn_txt_save_task">Save</string>
+    <string name="title_activity_recycler_view">RecyclerViewActivity</string>
 </resources>
