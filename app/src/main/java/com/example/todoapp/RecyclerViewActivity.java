@@ -1,6 +1,8 @@
 package com.example.todoapp;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -41,25 +43,61 @@ public class RecyclerViewActivity<customerAdapter> extends AppCompatActivity {
         recyclerView.setLayoutManager(linearLayoutManager);
 
         FloatingActionButton fab = findViewById(R.id.add_task);
+        readTask();
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(RecyclerViewActivity.this, NewTask.class);
-                startActivityForResult(intent, REQUEST_CODE_TASK);
+                //startActivityForResult(intent, REQUEST_CODE_TASK);
+                startActivity(intent);
             }
         });
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_TASK) {
-            if (resultCode == RESULT_OK) {
-                Pair<String,String> pair = new Pair<>(data.getStringExtra("Task"),data.getStringExtra("Category"));
-                dataSet.add(pair);
-                adapter = new CustomAdapter(dataSet);
-                recyclerView.setAdapter(adapter);
-            }
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        if (requestCode == REQUEST_CODE_TASK) {
+//            if (resultCode == RESULT_OK) {
+//                Pair<String,String> pair = new Pair<>(data.getStringExtra("Task"),data.getStringExtra("Category"));
+//                dataSet.add(pair);
+//                adapter = new CustomAdapter(dataSet);
+//                recyclerView.setAdapter(adapter);
+//            }
+//        }
+//    }
+
+    public void readTask(){
+        ToDoDatabase toDoDatabase = new ToDoDatabase(this);
+        SQLiteDatabase readableDB = toDoDatabase.getReadableDatabase();
+
+        Cursor cursor = readableDB.query(
+                DatabaseUtil.TaskTable.tableName,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+        List<Pair<String,String>> dataset = new ArrayList<>();
+        Pair<String, String> item;
+        while(cursor.moveToNext()){
+            String itemTask =
+                    cursor.getString(
+                            cursor.getColumnIndexOrThrow(
+                                    DatabaseUtil.TaskTable.taskColumn
+                            )
+                    );
+            String itemCategory =
+                    cursor.getString(
+                            cursor.getColumnIndexOrThrow(
+                                    DatabaseUtil.TaskTable.categoryColumn
+                            )
+                    );
+            item = new Pair<>(itemTask, itemCategory);
+            dataset.add(item);
         }
+        adapter = new CustomAdapter(dataset);
+        recyclerView.setAdapter(adapter);
     }
 }
